@@ -1,8 +1,0 @@
-# Fallback universe for screener.py, used only if the live Yahoo screen
-# fails or returns too few candidates. One ticker per line, '#' for comments.
-# This is a starting point, not a recommendation - add/remove tickers to
-# match whatever sub-$20 liquid names you actually want scanned.
-QBTS
-QUBT
-IONQ
-RGTI
