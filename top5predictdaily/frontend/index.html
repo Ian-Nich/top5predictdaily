@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quantum Stocks Predictor</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="hero">
+    <div>
+      <h1>Quantum Stocks Predictor</h1>
+      <p>Top 5 candidates under $20 predicted to gap &ge;5% at the open</p>
+    </div>
+    <div class="hero-actions">
+      <button id="refreshBtn">Pull Live Data</button>
+    </div>
+  </header>
+
+  <main>
+    <section id="statusBanner" class="fail-banner" style="display:none;"></section>
+
+    <section class="card">
+      <div class="section-header">
+        <h2>Top Picks</h2>
+        <span id="scanMeta" class="muted"></span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Ticker</th>
+            <th>Price</th>
+            <th>Direction</th>
+            <th>Confidence</th>
+            <th>Expected Move</th>
+            <th>Why</th>
+          </tr>
+        </thead>
+        <tbody id="picksTableBody">
+          <tr><td colspan="7">Loading...</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
