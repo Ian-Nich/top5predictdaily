@@ -44,7 +44,7 @@ from screener import _load_watchlist
 MODEL_OUT = Path(__file__).resolve().parent / "model.pkl"
 LOOKBACK = "1y"
 ROLL_WINDOW = 20
-GAP_THRESHOLD_PCT = 5.0
+GAP_THRESHOLD_PCT = 3.0
 
 
 def _per_ticker_frame(ticker: str) -> pd.DataFrame:
@@ -113,7 +113,50 @@ def build_dataset(tickers: list[str]) -> pd.DataFrame:
     return all_df
 
 
-def train(tickers: list[str] | None = None, test_frac: float = 0.2):
+def evaluate_top_k_precision(clf, test_df: pd.DataFrame, k: int = 5) -> None:
+    """The question that actually matters for this app: if you rank every
+    candidate each day and take the top K, how many of THOSE actually
+    gapped up >=5%? This is a different (and more relevant) number than
+    classification_report's default 0.5-threshold precision/recall, because
+    the live app never classifies every row - it ranks and takes a top-5
+    list, same as this does.
+
+    Known limitation: this evaluates against whatever tickers were in the
+    training universe on each historical date, using TODAY's sub-$20 filter
+    (from build_watchlist.py) applied to a year of history. A ticker that
+    was $22 eight months ago but is $18 now would be included here even
+    though it wouldn't have cleared a live sub-$20 screen back then. Close
+    enough for a first read, but worth knowing before treating this as a
+    precise backtest.
+    """
+    test_df = test_df.copy()
+    test_df["pred_proba"] = clf.predict_proba(test_df[FEATURE_ORDER].values)[:, 1]
+
+    total_picks = 0
+    total_hits = 0
+    days_with_a_hit = 0
+    n_days = 0
+
+    for _, group in test_df.groupby("Date"):
+        top_k = group.sort_values("pred_proba", ascending=False).head(k)
+        hits = int(top_k["label"].sum())
+        total_picks += len(top_k)
+        total_hits += hits
+        days_with_a_hit += 1 if hits > 0 else 0
+        n_days += 1
+
+    precision_at_k = total_hits / total_picks if total_picks else 0.0
+    base_rate = test_df["label"].mean()
+
+    print(f"\nTop-{k}-per-day evaluation on held-out test set:")
+    print(f"  Trading days evaluated: {n_days}")
+    print(f"  Total picks made: {total_picks}  Actual gap-ups among them: {total_hits}")
+    print(f"  Precision@{k}: {precision_at_k:.3f}  (base rate in test set: {base_rate:.3f}, "
+          f"so this is {precision_at_k / base_rate if base_rate else 0:.1f}x base rate)")
+    print(f"  Days with >=1 correct pick in the top {k}: {days_with_a_hit}/{n_days}")
+
+
+def train(tickers: list[str] | None = None, test_frac: float = 0.2, top_k: int = 5):
     from xgboost import XGBClassifier
     from sklearn.metrics import classification_report
 
@@ -150,6 +193,7 @@ def train(tickers: list[str] | None = None, test_frac: float = 0.2):
         print(f"Train rows: {len(train_df)}  Test rows: {len(test_df)}  "
               f"Positive rate (train): {y_train.mean():.3f}  (test): {y_test.mean():.3f}")
         print(classification_report(y_test, preds, zero_division=0))
+        evaluate_top_k_precision(clf, test_df, k=top_k)
     else:
         print("Not enough data for a held-out test split - training set only.")
 

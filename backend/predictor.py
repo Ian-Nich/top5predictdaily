@@ -90,7 +90,7 @@ def rank_top_picks(
     feature_list: List[Dict[str, Any]],
     top_n: int = 5,
     max_price: float = 20.0,
-    min_expected_move_pct: float = 5.0,
+    min_expected_move_pct: float = 3.0,
 ) -> List[Dict[str, Any]]:
     """Score every candidate, keep UP calls under max_price that clear the
     move threshold, and return the top_n by score.
