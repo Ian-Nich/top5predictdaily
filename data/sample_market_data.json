@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-08-06T23:05:40.590060",
+  "last_updated": "2026-08-06T23:21:57.027843",
   "market_session": "regular",
   "stocks": [
     {
@@ -270,9 +270,9 @@
       "avg_volume": 15183205,
       "relative_volume": 4.777,
       "volatility": 55.71,
-      "news_sentiment": 0.631,
+      "news_sentiment": 0.606,
       "news_count": 5,
-      "headline": "Iovance Biotherapeutics (IOVA) Pops 43% on Stellar Q2. Here\u2019s What Comes Next",
+      "headline": "Iovance Biotherapeutics Inc (IOVA) (Q2 2026) Earnings Call Highlights: Record Revenue and ...",
       "market_session": "regular"
     },
     {
@@ -322,9 +322,9 @@
       "avg_volume": 183972,
       "relative_volume": 1.0,
       "volatility": 48.29,
-      "news_sentiment": 0.617,
+      "news_sentiment": 0.621,
       "news_count": 5,
-      "headline": "SAB Biotherapeutics (SABS) and Breakthrough T1D Award Research Grant For SAB-142 Assessment",
+      "headline": "SAB Biotherapeutics Inc (SABS) (Q2 2026) Earnings Call Highlights: Advancing SAB142 with Strong ...",
       "market_session": "regular"
     },
     {
@@ -348,9 +348,9 @@
       "avg_volume": 1477025,
       "relative_volume": 9.731,
       "volatility": 49.03,
-      "news_sentiment": 0.468,
+      "news_sentiment": 0.519,
       "news_count": 5,
-      "headline": "Aspen Aerogels (ASPN) Reports Q2 Loss, Beats Revenue Estimates",
+      "headline": "Aspen Aerogels Inc (ASPN) (Q2 2026) Earnings Call Highlights: Strong Q3 Outlook and European ...",
       "market_session": "regular"
     },
     {
@@ -686,9 +686,9 @@
       "avg_volume": 6183,
       "relative_volume": 1.0,
       "volatility": 28.27,
-      "news_sentiment": 0.692,
+      "news_sentiment": 0.736,
       "news_count": 5,
-      "headline": "Better Home & Finance Holding (BETR) Resets Leadership As Investors Revisit The Bull Case",
+      "headline": "Better Home & Finance Q2 Earnings Call Highlights",
       "market_session": "regular"
     },
     {
@@ -727,7 +727,7 @@
       "volatility": 28.65,
       "news_sentiment": 0.523,
       "news_count": 5,
-      "headline": "Mativ Holdings (MATV) Beats Q2 Earnings and Revenue Estimates",
+      "headline": "Mativ Holdings Inc (MATV) (Q2 2026) Earnings Call Highlights: Record EBITDA and Strategic ...",
       "market_session": "regular"
     },
     {
