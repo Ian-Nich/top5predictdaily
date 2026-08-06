@@ -1,0 +1,6 @@
+timestamp,ticker,price,predicted_direction,confidence_pct,expected_move_pct,model_type,momentum,relative_volume,volume_spike,volatility,news_sentiment,news_count,rel_strength_vs_universe,universe_positive_ratio,qqq_change_pct,actual_gap_pct,actual_return_from_entry_pct,actual_best_return_pct
+2026-08-06T23:05:40.644988,HNST,5.42,UP,88.8,7.75,ML,40.78,13.566,1.0,52.94,0.74,5,-9.34,1.0,-0.369,,,
+2026-08-06T23:05:40.644988,PAVS,6.88,UP,88.8,7.75,ML,40.12,42.409,1.0,52.15,0.644,5,-10.0,1.0,-0.369,,,
+2026-08-06T23:05:40.644988,AZI,1.6,UP,88.5,7.7,ML,58.42,10.874,1.0,74.1,0.525,4,8.3,1.0,-0.369,,,
+2026-08-06T23:05:40.644988,XHLD,2.81,UP,88.3,7.66,ML,252.57,212.387,1.0,307.09,0.701,1,202.45,1.0,-0.369,,,
+2026-08-06T23:05:40.644988,WYHG,9.83,UP,88.3,7.66,ML,194.26,329.598,1.0,237.11,0.5,2,144.14,1.0,-0.369,,,

@@ -22,7 +22,7 @@ from pathlib import Path
 from typing import List
 
 MAX_PRICE = 20.0
-MIN_UNIVERSE_SIZE = 5  # if live screen returns fewer than this, fall back
+MIN_UNIVERSE_SIZE = 5  # if live screen returns fewer than this, get_universe() raises (no fallback)
 
 WATCHLIST_PATH = Path(__file__).resolve().parent.parent / "data" / "watchlist.txt"
 

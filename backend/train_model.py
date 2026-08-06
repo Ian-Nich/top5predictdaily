@@ -156,7 +156,20 @@ def evaluate_top_k_precision(clf, test_df: pd.DataFrame, k: int = 5) -> None:
     print(f"  Days with >=1 correct pick in the top {k}: {days_with_a_hit}/{n_days}")
 
 
-def train(tickers: list[str] | None = None, test_frac: float = 0.2, top_k: int = 5):
+def train(
+    tickers: list[str] | None = None,
+    test_frac: float = 0.2,
+    top_k: int = 5,
+    include_feedback: bool = True,
+):
+    """include_feedback: fold real, resolved live picks (from
+    picks_log.csv, via merge_feedback.py) into the TRAINING split only -
+    never into the held-out test split. That keeps evaluate_top_k_precision()
+    an honest read of generalization to data the feedback never touched,
+    while still letting real outcomes influence what the model learns.
+    Deferred import (not at module level) to avoid a circular import with
+    merge_feedback.py, which itself imports GAP_THRESHOLD_PCT from here.
+    """
     from xgboost import XGBClassifier
     from sklearn.metrics import classification_report
 
@@ -174,6 +187,15 @@ def train(tickers: list[str] | None = None, test_frac: float = 0.2, top_k: int =
     y_train = train_df["label"].values
     X_test = test_df[FEATURE_ORDER].values
     y_test = test_df["label"].values
+
+    if include_feedback:
+        from merge_feedback import load_resolved_feedback
+        feedback_df = load_resolved_feedback()
+        if not feedback_df.empty:
+            print(f"Adding {len(feedback_df)} real resolved pick(s) from "
+                  f"picks_log.csv into the training set (not the test set).")
+            X_train = np.vstack([X_train, feedback_df[FEATURE_ORDER].values])
+            y_train = np.concatenate([y_train, feedback_df["label"].values])
 
     pos = max(y_train.sum(), 1)
     neg = max(len(y_train) - y_train.sum(), 1)

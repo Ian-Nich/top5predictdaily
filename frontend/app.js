@@ -1,6 +1,6 @@
-const API_BASE = "https://predictionmodellally.onrender.com";
+const API_BASE = "http://localhost:8000";
 
-async function loadTopPicks(endpoint = "/api/top-picks", method = "GET") {
+async function loadTopPicks(endpoint = "/api/dev/top-picks", method = "GET") {
   setLoading();
 
   let response;
@@ -72,7 +72,7 @@ function renderTopPicks(data) {
   tableBody.innerHTML = "";
 
   if (!data.top_picks || data.top_picks.length === 0) {
-    tableBody.innerHTML = `<tr><td colspan="7">No candidates cleared the 5% / sub-$20 bar right now.</td></tr>`;
+    tableBody.innerHTML = `<tr><td colspan="7">No candidates cleared the 3% / sub-$20 bar right now.</td></tr>`;
     return;
   }
 
@@ -96,4 +96,6 @@ document.getElementById("refreshBtn").addEventListener("click", async () => {
   await loadTopPicks("/api/refresh", "POST");
 });
 
+// Page load shows the sample-data preview (no live pull, nothing logged) -
+// click "Pull Live Data" to hit the real pipeline via POST /api/refresh.
 loadTopPicks();
