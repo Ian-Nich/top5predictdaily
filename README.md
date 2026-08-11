@@ -46,16 +46,16 @@ top5predictdaily/
 # BEFORE RUNNING...
 
 ## Install with: python 
-```
-python -m venv .venv
-cd backend
-...venv\Scripts\Activate.ps1
-Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
-python -c "import sys; print(sys.executable)"
--m pip install -r requirements.txt (inside the activated venv)
-```
-In that order
 
+### python -m venv .venv
+### cd backend
+### ...venv\Scripts\Activate.ps1
+### Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+### python -c "import sys; print(sys.executable)"
+### -m pip install -r requirements.txt (inside the activated venv)
+
+##In that order
+```
 fastapi
 uvicorn[standard]
 pandas
@@ -65,7 +65,7 @@ yfinance
 xgboost
 scikit-learn
 vaderSentiment
-
+```
 # TO BEGIN RUNNING...
  
 ## 1. Confirm the frontend files are in place
