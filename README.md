@@ -9,7 +9,7 @@ the goal is to feed real outcomes back into retraining. Runs fully local
 for now - no hosting, no deployed API or URL.
 
 ## File Structure
-
+```
 top5predictdaily/
 ├── .venv/                          # created via `python -m venv .venv`, not committed
 ├── backend/
@@ -42,7 +42,7 @@ top5predictdaily/
 ├── AGENT_HANDOFF.md
 ├── DAILY_OPERATIONS.md
 └── LICENSE
-
+```
 # BEFORE RUNNING...
 
 ## Install with: python 
