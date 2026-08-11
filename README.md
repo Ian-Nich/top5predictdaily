@@ -1,13 +1,39 @@
-# top5predictdaily
+## top5predictdaily
 
+# What this project is, in one paragraph
 
+A daily market scanner that screens sub-$20 momentum stocks each morning,
+scores them with an XGBoost model, and surfaces the top 5 most likely to
+gap up >=3% at the open. Owner paper-trades (for now) the picks on Webull and
+the goal is to feed real outcomes back into retraining. Runs fully local
+for now - no hosting, no deployed API or URL.
 
-Readme running locally · MD
-# Running the app locally (backend + frontend)
+# BEFORE RUNNING...
+
+# Install with: python 
+```
+python -m venv .venv
+cd backend
+...venv\Scripts\Activate.ps1
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+python -c "import sys; print(sys.executable)"
+-m pip install -r requirements.txt (inside the activated venv)
+```
+In that order
+
+fastapi
+uvicorn[standard]
+pandas
+numpy
+requests
+yfinance
+xgboost
+scikit-learn
+vaderSentiment
+
+# TO BEGIN RUNNING...
  
-Everything runs fully local for now - no hosting, no deployed URL.
- 
-## 1. Confirm the frontend files are in place
+# 1. Confirm the frontend files are in place
  
 `frontend/app.js` and `frontend/index.html` should already point at
 `http://localhost:8000` and call the current API routes. Same folder as
@@ -54,5 +80,196 @@ the failed request there - it'll show the exact error (CORS, 404, 502,
 connection refused, etc.) rather than guessing blind from the rendered
 page alone.
  
-frontend
-7/15
+## Daily Operations Guide — top5predictdaily
+
+Companion to `README_RUNNING_LOCALLY.md`. That doc covers "how to start it."
+This one covers "what to actually do with it every day,"
+
+---
+
+## 1. Startup — terminals, venv, timing
+
+**Terminal 1 — Backend. venv REQUIRED.**
+```
+cd backend
+..\.venv\Scripts\Activate.ps1
+python -c "import sys; print(sys.executable)"   # confirm it points into .venv
+python app.py
+```
+Leave this running. It needs the venv because it imports yfinance, xgboost,
+vaderSentiment, fastapi, etc.
+
+**Terminal 2 — Frontend. venv NOT required.**
+```
+cd frontend
+python -m http.server 5500
+```
+This is stdlib `http.server` serving static files — no project dependencies,
+so any Python works. Don't bother activating the venv here.
+
+Open **http://localhost:5500/index.html**.
+
+**When to actually click "Pull Live Data":**
+The model is trained on a gap-at-the-open definition, so run it in the
+window that reflects that: **roughly 7:00–9:15am ET**, closer to 9:00 is
+better (tighter to the open = more representative premarket snapshot).
+Don't run it midday;
+`market_session` will say "regular" and the premarket-specific fields lose
+their meaning.
+
+**Shutting down:** just close both terminals once you've placed your orders
+for the day. Nothing needs to stay running after that — `picks_log.csv` is
+the only thing that persists, and it's already written to disk.
+
+---
+
+## 2. Timezone — running this from outside US Eastern Time
+
+Nothing in the code needs to change for a different user/location. The
+market itself opens at 9:30am **ET** no matter where you are — that's fixed
+by the exchange, not something to localize. What changes per person is just
+**which wall-clock hours** those ET times correspond to for them.
+
+**Convert the premarket window (4:00–9:30am ET) to your local time:**
+
+| Your zone | 4:00am ET is... | 9:30am ET is... |
+|---|---|---|
+| Pacific (PT) | 1:00am | 6:30am |
+| Central (CT) | 3:00am | 8:30am |
+| Mountain (MT) | 2:00am | 7:30am |
+| UK (London) | 9:00am | 2:30pm |
+| Central Europe | 10:00am | 3:30pm |
+
+Caveat: the US and UK/EU don't shift their clocks for DST on the same
+calendar dates, so the offset shifts by an hour for a few weeks each
+spring/fall. Worth double-checking against a live "current time in New
+York" search near those transitions rather than trusting a static table
+then.
+
+**The one place TZ actually matters in code:** if you ever schedule
+`run_daily.py` (currently manual — not set up), cron/launchd/Task
+Scheduler all use the *machine's* local time by default. `run_daily.py`'s
+docstring already flags this — use `TZ=America/New_York` in the crontab
+line (or confirm the machine's system timezone for launchd/Task Scheduler)
+so the job fires at the right ET time regardless of where the server
+physically sits.
+
+If you'd rather the app *display* "next premarket window in your local
+time" instead of doing mental math, that's a small frontend addition
+(convert via JS `Intl.DateTimeFormat` with `timeZone: "America/New_York"`)
+— not built now, flag if you want it.
+
+---
+
+## 3. Placing the trade on Webull
+
+**Buy — market vs. limit:**
+- **Market order:** guarantees you get filled at the open, but no price
+  protection — if the stock gaps further than expected before your order
+  reaches the book, you could pay noticeably more than the app's shown
+  price.
+- **Limit order (recommended):** set the limit at
+  or slightly *below* the price shown in the Top Picks table, building in cushion instead of chasing the exact printed price.
+  Tradeoff: it might not fill at all if the stock opens above your limit.
+
+**Order settings that matter:**
+- Order type: Limit (or Market, per above)
+- TIF: Day
+- Trading Hours: **Only Regular Hours** — this is what actually worked.
+  The order sits queued and activates at the 9:30am open. Don't use an
+  Overnight/Extended session selector if Webull's ticket offers one —
+  that's a different session (8pm–4am ET) unrelated to what this pipeline
+  predicts, and is what caused the VREX mix-up.
+
+**Sell — limit at 1.03x the buy fill:**
+
+Only place this **after** the buy shows **Filled** (not "Working") —
+confirm in Positions that you actually own the shares first.
+
+```
+sell_limit = round(buy_fill_price * 1.03, 2)
+```
+
+Example from day 0 (08/11) [XHLD]: buy filled at $2.98 → `2.98 × 1.03 = 3.0694` →
+**$3.07**. (Today's actual sell was set at $3.06 — slightly conservative,
+still fine, just note the exact formula gives $3.07 if you want to be
+precise going forward.)
+
+Same settings as the buy: Limit, Day, Only Regular Hours.
+
+---
+
+## 4. Closing the feedback loop — recording today's outcome
+
+This is what turns "did I win or lose today" into something the model can
+actually learn from. Run this **the next calendar day or later** — the
+1-day buffer exists because same-day open/high data isn't fully settled.
+
+**Terminal 3 (or reuse Terminal 1) — venv REQUIRED:**
+```
+cd backend
+python fill_actual_gap.py
+```
+Pulls real next-day open/high from yfinance and fills in `actual_gap_pct`,
+`actual_return_from_entry_pct`, and `actual_best_return_pct` for any row
+old enough and not yet resolved. Safe to run daily — it never touches an
+already-filled row
+
+# no harm in running it every morning as a habit alongside your premarket scan.
+
+**Check what's usable for training (optional, informational only):**
+```
+python merge_feedback.py
+```
+Just reports how many resolved rows have a complete feature vector and
+are ready to be folded into the next retrain. Doesn't change anything by
+itself.
+
+---
+
+## 5. When to actually run `train_model.py`
+
+**Not daily, and not after every trade.** Two reasons:
+- The model already trains on ~320,000 historical rows. A single new
+  resolved pick (or even ten) is a rounding error against that — it won't
+  move the model meaningfully, but it will add noise if you're
+  retraining on too small a sample.
+- Comparing metrics run-to-run (Precision@5, days-with-a-hit) only means
+  something if the *feedback batch* being folded in is big enough that a
+  change reflects a real signal, not a coin flip from 2 wins vs 3 wins.
+
+**Rule of thumb:** let resolved feedback rows accumulate for a while —
+tens of rows, not single digits — before retraining. Right now you're at
+10 resolved rows (8 hits / 2 misses) from before today; today's XHLD trade
+will add one more once `fill_actual_gap.py` picks it up tomorrow or later.
+Keep trading and logging; don't retrain yet just because of one win.
+
+**When you do retrain:**
+```
+cd backend
+python train_model.py
+```
+`include_feedback=True` is the default — it folds resolved rows into the
+**training** split only, never into the held-out test split, so the
+printed Precision@5 stays an honest read on data the feedback never
+touched.
+
+**After it finishes**, compare the printed block against the last run
+(train/test row counts, Precision@5, days-with-a-hit) — not the `.pkl`
+file itself, there's nothing to diff there. If the numbers move
+meaningfully worse, that's worth investigating before trusting the new
+model over the old one.
+
+---
+
+## Quick reference
+
+| Task | Command | venv? | Frequency |
+|---|---|---|---|
+| Start backend | `python app.py` | Yes | Every trading day |
+| Start frontend | `python -m http.server 5500` | No | Every trading day |
+| Pull live picks | Click "Pull Live Data" in browser | — | ~7:00–9:15am ET |
+| Resolve yesterday's outcomes | `python fill_actual_gap.py` | Yes | Daily, after 1+ day old |
+| Check feedback readiness | `python merge_feedback.py` | Yes | Optional, informational |
+| Retrain model | `python train_model.py` | Yes | Only once feedback rows are in the tens, not after every trade |
+| Refresh training universe | `python build_watchlist.py` | Yes | Weekly/monthly |

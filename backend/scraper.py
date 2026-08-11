@@ -27,7 +27,7 @@ refresh fail when any one candidate errors.
 from __future__ import annotations
 
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -155,7 +155,7 @@ def try_live_pull(max_price: float = MAX_PRICE) -> Dict[str, Any]:
         qqq_change_pct = 0.0
 
     live_data = {
-        "last_updated": datetime.utcnow().isoformat(),
+        "last_updated": datetime.now(timezone.utc).isoformat(),
         "market_session": stock_rows[0]["market_session"] if stock_rows else "unknown",
         "stocks": stock_rows,
         "macro": {"qqq_change_pct": round(qqq_change_pct, 3)},

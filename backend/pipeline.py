@@ -34,7 +34,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Dict, List
 import csv
-from datetime import datetime
+from datetime import datetime, timezone
 
 from feature_engineering import build_features
 from predictor import rank_top_picks, FEATURE_ORDER
@@ -66,7 +66,7 @@ def log_picks(picks: List[Dict[str, Any]], feature_by_ticker: Dict[str, Dict[str
         for pick in picks:
             features = feature_by_ticker.get(pick["ticker"], {})
             writer.writerow(
-                [datetime.utcnow().isoformat(), pick["ticker"], pick["price"],
+                [datetime.now(timezone.utc).isoformat(), pick["ticker"], pick["price"],
                  pick["predicted_direction"], pick["confidence_pct"],
                  pick["expected_move_pct"], pick["model_type"]]
                 + [features.get(key, "") for key in FEATURE_ORDER]
@@ -96,7 +96,7 @@ def assemble_top_picks(data: Dict[str, Any], top_n: int = 5, log: bool = False) 
         log_picks(picks, feature_by_ticker)
 
     return {
-        "generated_at": datetime.utcnow().isoformat(),
+        "generated_at": datetime.now(timezone.utc).isoformat(),
         "market_session": data.get("market_session", "unknown"),
         "candidates_scanned": len(feature_list),
         "top_picks": picks,
