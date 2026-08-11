@@ -47,12 +47,12 @@ top5predictdaily/
 
 ## Install with: python 
 ```
-**python -m venv .venv**
-**cd backend**
-**...venv\Scripts\Activate.ps1**
-**Set-ExecutionPolicy -Scope CurrentUser RemoteSigned**
-**python -c "import sys; print(sys.executable)"**
-**-m pip install -r requirements.txt (inside the activated venv)**
+python -m venv .venv
+cd backend
+...venv\Scripts\Activate.ps1
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+python -c "import sys; print(sys.executable)"
+-m pip install -r requirements.txt (inside the activated venv)
 ```
 ## In that order
 ```
