@@ -38,8 +38,6 @@ top5predictdaily/
 ├── README.md
 ├── README_RUNNING_LOCALLY.md
 ├── README_FUTURE_EXPANSION.md
-├── AGENT_HANDOFF.md
-├── DAILY_OPERATIONS.md
 └── LICENSE
 ```
 # BEFORE RUNNING...
@@ -53,8 +51,8 @@ Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 python -c "import sys; print(sys.executable)"
 -m pip install -r requirements.txt (inside the activated venv)
 ```
-In that order
-
+## In that order
+```
 fastapi
 uvicorn[standard]
 pandas
@@ -64,7 +62,7 @@ yfinance
 xgboost
 scikit-learn
 vaderSentiment
-
+```
 # TO BEGIN RUNNING...
  
 ## 1. Confirm the frontend files are in place
